@@ -75,3 +75,8 @@ func parseUdpAddr(udpAddr string) (*net.Interface, string, int, error) {
 	}
 	return ifi, matches[2], port, nil
 }
+
+func strToInt(s string) int {
+	o, _ := strconv.Atoi(s)
+	return o
+}

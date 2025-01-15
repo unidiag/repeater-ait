@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 
 	"github.com/cesbo/go-mpegts"
 	"github.com/cesbo/go-mpegts/crc32"
@@ -90,7 +91,7 @@ func aitRepeater(udpAddrStr, hbblink string) {
 			if packet.PID() == 0 {
 				pmtPID, err = ParsePAT(packet)
 				if err != nil {
-					log.Printf("Unknown PMT in " + udpAddr)
+					log.Println("Unknown PMT in " + udpAddr)
 					return
 				}
 			} else if packet.PID() == mpegts.PID(pmtPID) {
@@ -99,7 +100,11 @@ func aitRepeater(udpAddrStr, hbblink string) {
 				pids, _ := ParsePMT(packet) // получаем все пиды таблицы PMT
 				//if aitPID == 0 || slices.Contains(pids, aitPID) { // проверяем 0 и чтобы не входило в состав имеющихся пидов
 				maxPid, _ := GetMaxUint16(pids) // выделяем максимальный из них
-				aitPID = maxPid + 101           // если пид AIT не задан на входе в функцию, то сделаем его +1 от максимального..
+				if len(os.Args) == 4 {
+					aitPID = uint16(strToInt(os.Args[3])) // если пид был передан в третьем параметре
+				} else {
+					aitPID = maxPid + 101 // если пид AIT не задан на входе в функцию, то сделаем его +1 от максимального..
+				}
 				if ut == 0 {
 					echo("AIT pid: " + toStr(aitPID))
 				} else if ut != tt {
